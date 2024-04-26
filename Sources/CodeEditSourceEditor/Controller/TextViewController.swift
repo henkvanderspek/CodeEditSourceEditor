@@ -117,6 +117,9 @@ public class TextViewController: NSViewController {
             textView.isEditable = isEditable
         }
     }
+    
+    /// Whether or not the gutter is visible for the user
+    public var isGutterVisible: Bool
 
     /// Whether or not text view is selectable by user
     public var isSelectable: Bool {
@@ -194,6 +197,7 @@ public class TextViewController: NSViewController {
         highlightProvider: HighlightProviding?,
         contentInsets: NSEdgeInsets?,
         isEditable: Bool,
+        isGutterVisible: Bool,
         isSelectable: Bool,
         letterSpacing: Double,
         bracketPairHighlight: BracketPairHighlight?,
@@ -212,6 +216,7 @@ public class TextViewController: NSViewController {
         self.highlightProvider = highlightProvider
         self.contentInsets = contentInsets
         self.isEditable = isEditable
+        self.isGutterVisible = isGutterVisible
         self.isSelectable = isSelectable
         self.letterSpacing = letterSpacing
         self.bracketPairHighlight = bracketPairHighlight

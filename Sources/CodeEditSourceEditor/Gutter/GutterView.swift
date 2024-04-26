@@ -60,6 +60,7 @@ public class GutterView: NSView {
         font: NSFont,
         textColor: NSColor,
         textView: TextView,
+        isVisible: Bool,
         delegate: GutterViewDelegate? = nil
     ) {
         self.font = font
@@ -68,6 +69,7 @@ public class GutterView: NSView {
         self.delegate = delegate
 
         super.init(frame: .zero)
+        isHidden = !isVisible
         clipsToBounds = true
         wantsLayer = true
         layerContentsRedrawPolicy = .onSetNeedsDisplay
@@ -93,7 +95,7 @@ public class GutterView: NSView {
 
     /// Updates the width of the gutter if needed.
     func updateWidthIfNeeded() {
-        guard let textView else { return }
+        guard let textView, !isHidden else { return }
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .foregroundColor: textColor

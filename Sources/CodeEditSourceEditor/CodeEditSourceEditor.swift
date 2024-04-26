@@ -53,6 +53,7 @@ public struct CodeEditSourceEditor: NSViewControllerRepresentable {
         contentInsets: NSEdgeInsets? = nil,
         isEditable: Bool = true,
         isSelectable: Bool = true,
+        isGutterVisible: Bool = true,
         letterSpacing: Double = 1.0,
         bracketPairHighlight: BracketPairHighlight? = nil,
         undoManager: CEUndoManager? = nil,
@@ -73,6 +74,7 @@ public struct CodeEditSourceEditor: NSViewControllerRepresentable {
         self.contentInsets = contentInsets
         self.isEditable = isEditable
         self.isSelectable = isSelectable
+        self.isGutterVisible = isGutterVisible
         self.letterSpacing = letterSpacing
         self.bracketPairHighlight = bracketPairHighlight
         self.undoManager = undoManager
@@ -98,6 +100,7 @@ public struct CodeEditSourceEditor: NSViewControllerRepresentable {
     private var bracketPairHighlight: BracketPairHighlight?
     private var undoManager: CEUndoManager?
     private var coordinators: [any TextViewCoordinator]
+    private let isGutterVisible: Bool
 
     public typealias NSViewControllerType = TextViewController
 
@@ -117,6 +120,7 @@ public struct CodeEditSourceEditor: NSViewControllerRepresentable {
             highlightProvider: highlightProvider,
             contentInsets: contentInsets,
             isEditable: isEditable,
+            isGutterVisible: isGutterVisible,
             isSelectable: isSelectable,
             letterSpacing: letterSpacing,
             bracketPairHighlight: bracketPairHighlight,

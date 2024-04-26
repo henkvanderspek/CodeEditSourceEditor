@@ -26,6 +26,7 @@ extension TextViewController {
             font: font.rulerFont,
             textColor: .secondaryLabelColor,
             textView: textView,
+            isVisible: isGutterVisible,
             delegate: self
         )
         gutterView.updateWidthIfNeeded()
