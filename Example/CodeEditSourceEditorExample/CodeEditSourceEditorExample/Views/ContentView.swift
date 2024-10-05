@@ -19,6 +19,8 @@ struct ContentView: View {
     @State private var font: NSFont = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
     @AppStorage("wrapLines") private var wrapLines: Bool = true
     @State private var cursorPositions: [CursorPosition] = []
+    @AppStorage("systemCursor") private var useSystemCursor: Bool = false
+    @State private var isInLongParse = false
 
     init(document: Binding<CodeEditSourceEditorExampleDocument>, fileURL: URL?) {
         self._document = document
@@ -32,6 +34,13 @@ struct ContentView: View {
                 LanguagePicker(language: $language)
                     .frame(maxWidth: 100)
                 Toggle("Wrap Lines", isOn: $wrapLines)
+                if #available(macOS 14, *) {
+                    Toggle("Use System Cursor", isOn: $useSystemCursor)
+                } else {
+                    Toggle("Use System Cursor", isOn: $useSystemCursor)
+                        .disabled(true)
+                        .help("macOS 14 required")
+                }
                 Spacer()
                 Text(getLabel(cursorPositions))
             }
@@ -39,19 +48,46 @@ struct ContentView: View {
             .zIndex(2)
             .background(Color(NSColor.windowBackgroundColor))
             Divider()
-            CodeEditSourceEditor(
-                $document.text,
-                language: language,
-                theme: theme,
-                font: font,
-                tabWidth: 4,
-                lineHeight: 1.2,
-                wrapLines: wrapLines,
-                cursorPositions: $cursorPositions
-            )
+            ZStack {
+                if isInLongParse {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            Text("Parsing document...")
+                            Spacer()
+                        }
+                        .padding(4)
+                        .background(Color(NSColor.windowBackgroundColor))
+                        Spacer()
+                    }
+                    .zIndex(2)
+                    .transition(.opacity)
+                }
+                CodeEditSourceEditor(
+                    $document.text,
+                    language: language,
+                    theme: theme,
+                    font: font,
+                    tabWidth: 4,
+                    lineHeight: 1.2,
+                    wrapLines: wrapLines,
+                    cursorPositions: $cursorPositions,
+                    useSystemCursor: useSystemCursor
+                )
+            }
         }
         .onAppear {
             self.language = detectLanguage(fileURL: fileURL) ?? .default
+        }
+        .onReceive(NotificationCenter.default.publisher(for: TreeSitterClient.Constants.longParse)) { _ in
+            withAnimation(.easeIn(duration: 0.1)) {
+                isInLongParse = true
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: TreeSitterClient.Constants.longParseFinished)) { _ in
+            withAnimation(.easeIn(duration: 0.1)) {
+                isInLongParse = false
+            }
         }
     }
 
@@ -78,7 +114,7 @@ struct ContentView: View {
         }
 
         // When there's a single cursor, display the line and column.
-        return "Line: \(cursorPositions[0].line)  Col: \(cursorPositions[0].column)"
+        return "Line: \(cursorPositions[0].line)  Col: \(cursorPositions[0].column) Range: \(cursorPositions[0].range)"
     }
 }
 

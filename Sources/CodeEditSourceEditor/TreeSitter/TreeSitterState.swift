@@ -10,7 +10,7 @@ import SwiftTreeSitter
 import CodeEditLanguages
 
 /// TreeSitterState contains the tree of language layers that make up the tree-sitter document.
-public class TreeSitterState {
+public final class TreeSitterState {
     private(set) var primaryLayer: CodeLanguage
     private(set) var layers: [LanguageLayer] = []
 
@@ -37,6 +37,16 @@ public class TreeSitterState {
         self.layers = layers
     }
 
+    /// Creates a copy of the current state.
+    ///
+    /// This should be a fairly cheap operation. Copying tree-sitter trees never actually copies the contents, just
+    /// increments a global ref counter.
+    ///
+    /// - Returns: A new, disconnected copy of the tree sitter state.
+    public func copy() -> TreeSitterState {
+        TreeSitterState(codeLanguage: primaryLayer, layers: layers.map { $0.copy() })
+    }
+
     /// Sets the language for the state. Removing all existing layers.
     /// - Parameter codeLanguage: The language to use.
     private func setLanguage(_ codeLanguage: CodeLanguage) {
@@ -46,6 +56,7 @@ public class TreeSitterState {
         layers = [
             LanguageLayer(
                 id: codeLanguage.id,
+                tsLanguage: codeLanguage.language,
                 parser: Parser(),
                 supportsInjections: codeLanguage.additionalHighlights?.contains("injections") ?? false,
                 tree: nil,
@@ -117,6 +128,7 @@ public class TreeSitterState {
 
         let newLayer = LanguageLayer(
             id: layerId,
+            tsLanguage: language.language,
             parser: Parser(),
             supportsInjections: language.additionalHighlights?.contains("injections") ?? false,
             tree: nil,
@@ -205,7 +217,7 @@ public class TreeSitterState {
             return IndexSet()
         }
 
-        cursor.matchLimit = TreeSitterClient.Constants.treeSitterMatchLimit
+        cursor.matchLimit = TreeSitterClient.Constants.matchLimit
 
         let languageRanges = self.injectedLanguagesFrom(cursor: cursor) { range, point in
             return readCallback(range, point)
@@ -226,6 +238,7 @@ public class TreeSitterState {
                 // Temp layer object
                 let layer = LanguageLayer(
                     id: treeSitterLanguage,
+                    tsLanguage: nil,
                     parser: Parser(),
                     supportsInjections: false,
                     ranges: [range.range]

@@ -80,8 +80,8 @@ public class GutterView: NSView {
             forName: TextSelectionManager.selectionChangedNotification,
             object: nil,
             queue: .main
-        ) { _ in
-            self.needsDisplay = true
+        ) { [weak self] _ in
+            self?.needsDisplay = true
         }
     }
 
@@ -215,5 +215,7 @@ public class GutterView: NSView {
 
     deinit {
         NotificationCenter.default.removeObserver(self)
+        delegate = nil
+        textView = nil
     }
 }
